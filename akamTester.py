@@ -31,14 +31,22 @@ print()
 
 color_print('共取得 '+str(len(ip_list))+' 个 IP, 开始测试延迟')
 print()
+ip_info = []
 good_ips = []
 
-for ip in akam.get_ip_list():
+for ip in ip_list:
     delay = ping_test(ip)
+    ip_info.append({'ip':ip, 'delay':delay})
     if delay < 100:
         good_ips.append({'ip':ip, 'delay':delay})
 print()
 
-color_print('基于当前网络环境, 以下为低延迟IP')
-for ip in good_ips:
-    color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms', status=2)
+if len(good_ips) > 0:
+    color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
+    for ip in good_ips:
+        color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms', status=2)
+else:
+    ip_info.sort(key=lambda x:x['delay'])
+    color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 3 个节点', status=1)
+    for i in range(0,3):
+        color_print(ip_info[i]['ip'] + '  平均延迟:   ' + str(ip_info[i]['delay']) + ' ms')

@@ -95,6 +95,7 @@ class GlobalDNS():
 
     def renew(self):
         print('正在对 ' + self.__domain + ' 进行全球解析……')
+        self.__session.cookies.clear()
         self.__get_src()
         self.__get_token()
         self.__get_dns_id()
