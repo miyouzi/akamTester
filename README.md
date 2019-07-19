@@ -3,5 +3,5 @@
 
 依赖:
 ```
-pip3 install requests beautifulsoup4 lxml termcolor
+pip3 install requests beautifulsoup4 lxml termcolor pythonping
 ```
