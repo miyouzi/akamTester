@@ -19,7 +19,6 @@ def ping_test(ip):
         color_print(msg)
     return delay
 
-# ping_test('miyouzi.top')
 akam = GlobalDNS('upos-hz-mirrorakam.akamaized.net')
 
 color_print('第一次解析:')
@@ -42,4 +41,4 @@ print()
 
 color_print('基于当前网络环境, 以下为低延迟IP')
 for ip in good_ips:
-    color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms')
+    color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms', status=2)
