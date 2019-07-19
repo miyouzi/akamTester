@@ -5,9 +5,9 @@
 # @File    : GlobalDNS.py
 # @Software: PyCharm
 
-import requests, lxml
+import requests, dns.resolver
 from bs4 import BeautifulSoup
-import re, time
+import re, time, socket
 
 
 class GlobalDNS():
@@ -69,6 +69,32 @@ class GlobalDNS():
             self.__dns_id.add(id.get('data-id'))
         # print(self.__dns_id)
 
+    def __extend_query(self):
+        # 本地解析
+        A = dns.resolver.query(self.__domain, 'A')
+        for i in A:
+            self.__ip_list.add(i.address)
+
+        # 谷歌解析
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = [socket.gethostbyname('8.8.4.4')]
+        A = resolver.query(self.__domain, 'A')
+        for i in A:
+            self.__ip_list.add(i.address)
+
+        # 腾讯解析
+        resolver.nameservers = [socket.gethostbyname('119.29.29.29')]
+        A = resolver.query(self.__domain, 'A')
+        for i in A:
+            self.__ip_list.add(i.address)
+
+        # 阿里解析
+        resolver.nameservers = [socket.gethostbyname('223.5.5.5')]
+        A = resolver.query(self.__domain, 'A')
+        for i in A:
+            self.__ip_list.add(i.address)
+
+
     def __global_query(self):
         for dns_id in self.__dns_id:
             url = 'https://www.whatsmydns.net/api/check?server='+dns_id\
@@ -100,5 +126,6 @@ class GlobalDNS():
         self.__get_token()
         self.__get_dns_id()
         self.__global_query()
+        self.__extend_query()
         print(self.__domain + ' 的全球解析已完成')
 
