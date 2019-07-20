@@ -48,6 +48,7 @@ print()
 
 if len(good_ips) > 0:
     color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
+    good_ips.sort(key=lambda x:x['delay'])
     for ip in good_ips:
         color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms', status=2)
 else:
