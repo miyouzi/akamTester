@@ -1,0 +1,5 @@
+requests==2.19.1
+termcolor==1.1.0
+pythonping==1.0.4
+beautifulsoup4==4.7.1
+dnspython==1.16.0

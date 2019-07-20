@@ -8,6 +8,7 @@
 from pythonping import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
+import sys
 
 def ping_test(ip):
     result = ping(ip, count=5)
@@ -50,3 +51,7 @@ else:
     color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 3 个节点', status=1)
     for i in range(0,3):
         color_print(ip_info[i]['ip'] + '  平均延迟:   ' + str(ip_info[i]['delay']) + ' ms')
+
+print()
+input('按回车退出')
+sys.exit(1)
