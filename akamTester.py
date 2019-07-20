@@ -29,6 +29,10 @@ color_print('第二次解析:')
 akam.renew()
 ip_list = ip_list | akam.get_ip_list()
 print()
+color_print('第三次解析:')
+akam.renew()
+ip_list = ip_list | akam.get_ip_list()
+print()
 
 color_print('共取得 '+str(len(ip_list))+' 个 IP, 开始测试延迟')
 print()
@@ -54,4 +58,4 @@ else:
 
 print()
 input('按回车退出')
-sys.exit(1)
+sys.exit(0)
