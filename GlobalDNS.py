@@ -37,7 +37,7 @@ class GlobalDNS():
             # "referer": ref,
             "Accept": accept,
             "Accept-Language": lang,
-            "Accept-Encoding": accept_encoding,
+            # "Accept-Encoding": accept_encoding,
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
             "Pragma": cache_control,
@@ -61,8 +61,8 @@ class GlobalDNS():
         return BeautifulSoup(f.content, "lxml")
 
     def __get_src(self):
-        # bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
-        bf4 = self.__request('https://www.whatsmydns.net/')
+        bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
+        # bf4 = self.__request('https://www.whatsmydns.net/')
         self.__src = bf4
 
     def __get_token(self):

@@ -9,12 +9,10 @@ from pythonping import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 import sys, os
-import numpy as np
-
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
-ip_list_path = os.path.join(working_dir, 'ip_list.npy')
+ip_list_path = os.path.join(working_dir, 'ip_list.txt')
 
 
 def ping_test(ip):
@@ -44,8 +42,8 @@ except BaseException as e:
     color_print('进行全球解析时遇到未知错误: '+str(e), status=1)
     if os.path.exists(ip_list_path):
         color_print('将读取本地保存的ip列表', status=1)
-        ip_list = np.load(ip_list_path, allow_pickle=True)
-        ip_list = ip_list.tolist()
+        with open(ip_list_path, 'r', encoding='utf-8') as f:
+            ip_list = f.read().splitlines()
     else:
         color_print('没有本地保存的ip列表！程序终止！', status=1)
         print()
@@ -53,7 +51,10 @@ except BaseException as e:
         sys.exit(0)
 else:
     # 保存解析结果
-    np.save(ip_list_path, np.array(ip_list))
+    with open(ip_list_path, 'w', encoding='utf-8') as f:
+        for ip in ip_list:
+            f.write(str(ip))
+            f.write('\n')
 
 print()
 color_print('共取得 '+str(len(ip_list))+' 个 IP, 开始测试延迟')

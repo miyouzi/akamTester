@@ -1,4 +1,3 @@
-numpy
 termcolor==1.1.0
 pythonping==1.0.4
 requests==2.22.0
