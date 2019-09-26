@@ -1,10 +1,12 @@
 # akamTester
-批量测试B站海外CDN（upos-hz-mirrorakam.akamaized.net）节点延迟，找出最低延迟的节点
+批量测试B站海外CDN（upos-hz-mirrorakam.akamaized.net）节点延迟，找出最低延迟的节点。
 
 在之后在Hosts中追加：
 ```
 最低延迟的IP upos-hz-mirrorakam.akamaized.net
 ```
+
+另外, ```ip_list.npy``` 文件用于保存解析出来的ip列表, 当正常解析完成时, 该文件会刷新, 当解析失败时, 会读取该文件中的ip列表。
 
 ## EXE文件运行
 不熟悉Python的用户从 [releases](https://github.com/miyouzi/akamTester/releases/latest) 下载exe文件直接使用。

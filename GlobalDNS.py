@@ -20,23 +20,29 @@ class GlobalDNS():
         self.__token = ''
         self.__src = None
         self.__init_header()
+        self.__session.headers.update(self.__req_header)
 
     def __init_header(self):
         # 伪装为Chrome
         host = 'www.whatsmydns.net'
-        ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+        ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'
         ref = 'https://' + host + '/'
-        lang = 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.6'
-        accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
-        accept_encoding = 'gzip, deflate, br'
-        cache_control = 'max-age=0'
+        lang = 'zh-TW,zh;q=0.8,zh-HK;q=0.6,en-US;q=0.4,en;q=0.2'
+        accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        accept_encoding = 'gzip, deflate'
+        cache_control = 'no-cache'
         header = {
-            "user-agent": ua,
-            "referer": ref,
-            "accept-language": lang,
-            "accept": accept,
-            "accept-encoding": accept_encoding,
-            "cache-control": cache_control
+            "Host": host,
+            "User-Agent": ua,
+            # "referer": ref,
+            "Accept": accept,
+            "Accept-Language": lang,
+            "Accept-Encoding": accept_encoding,
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Pragma": cache_control,
+            "Cache-Control": cache_control,
+            "TE": "Trailers"
         }
         self.__req_header = header
 
@@ -44,7 +50,7 @@ class GlobalDNS():
         error_cnt = 0
         while True:
             try:
-                f = self.__session.get(url, headers= self.__req_header, timeout=10)
+                f = self.__session.get(url, timeout=10)
                 break
             except requests.exceptions.RequestException as e:
                 # print('请求出现异常')
@@ -55,13 +61,13 @@ class GlobalDNS():
         return BeautifulSoup(f.content, "lxml")
 
     def __get_src(self):
-        bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
+        # bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
+        bf4 = self.__request('https://www.whatsmydns.net/')
         self.__src = bf4
 
     def __get_token(self):
-        token = self.__src.find('input',id='_token')
+        token = self.__src.find('input', id='_token')
         self.__token = token.get('value')
-        # print('token= '+self.__token)
 
     def __get_dns_id(self):
         a = self.__src.find_all('tr')
@@ -93,7 +99,6 @@ class GlobalDNS():
         A = resolver.query(self.__domain, 'A')
         for i in A:
             self.__ip_list.add(i.address)
-
 
     def __global_query(self):
         for dns_id in self.__dns_id:
