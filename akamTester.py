@@ -27,7 +27,7 @@ def ping_test(ip):
     return delay
 
 
-version_msg = '当前akamTester版本' + str(version)
+version_msg = '当前akamTester版本: ' + str(version)
 color_print(version_msg, 2)
 host = 'upos-hz-mirrorakam.akamaized.net'
 

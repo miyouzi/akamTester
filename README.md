@@ -7,6 +7,8 @@
 ```
 
 另外, ```ip_list.txt``` 文件用于保存解析出来的ip列表, 当正常解析完成时, 该文件会刷新, 当解析失败时, 会读取该文件中的ip列表。
+ 
+:warning: 在Win7上需要使用管理员权限运行! :warning:
 
 ## EXE文件运行
 不熟悉Python的用户从 [releases](https://github.com/miyouzi/akamTester/releases/latest) 下载exe文件直接使用。
