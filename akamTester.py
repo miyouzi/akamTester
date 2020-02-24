@@ -8,11 +8,12 @@
 from pythonping import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
-import sys, os
+import sys, os, argparse
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
+version = 3.2
 
 
 def ping_test(ip):
@@ -26,8 +27,20 @@ def ping_test(ip):
     return delay
 
 
+version_msg = '当前akamTester版本' + str(version)
+color_print(version_msg, 2)
+host = 'upos-hz-mirrorakam.akamaized.net'
+
+# 支持命令行, 允许用户通过参数指定测试域名
+if len(sys.argv) > 1:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--user_host', '-u', type=str, help='指定测试域名', default=host, required=True)
+    arg = parser.parse_args()
+    if arg.user_host:
+        host = arg.user_host
+
 try:
-    akam = GlobalDNS('upos-hz-mirrorakam.akamaized.net')
+    akam = GlobalDNS(host)
     color_print('第一次解析:')
     ip_list = akam.get_ip_list()
     print()

@@ -5,9 +5,10 @@
 # @File    : ColorPrinter.py
 # @Software: PyCharm
 
-import ctypes, subprocess, platform, os, json, re
+import ctypes, subprocess, platform, os
 from termcolor import cprint
 from datetime import datetime
+
 
 def color_print(msg, status=0):
     # status 三个设定值, 0 为一般输出, 1 为错误输出, 2 为成功输出
@@ -16,7 +17,7 @@ def color_print(msg, status=0):
     def succeed_or_failed_print():
         check_tty = subprocess.Popen('tty', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         check_tty_return_str = check_tty.stdout.read().decode("utf-8")[0:-1]
-        if 'Windows' in platform.system() and check_tty_return_str == '/dev/cons0':
+        if 'Windows' in platform.system() and check_tty_return_str in ('/dev/cons0', ''):
             clr = Color()
             if green:
                 clr.print_green_text(msg)

@@ -23,6 +23,15 @@ pip3 install requests beautifulsoup4 lxml termcolor pythonping dnspython
 python3 akamTester.py
 ```
 
+## 指定测试域名
+
+从v3.2开始, 用户可以通过```-u```参数指定测试域名.
+
+举例:
+```
+python3 akamTester.py -u upos-sz-mirrorks3.bilivideo.com
+```
+
 ## 关于轮子
 
 ### GlobalDNS
