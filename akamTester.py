@@ -13,13 +13,13 @@ import sys, os, argparse
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
-version = 3.2
+version = 4.0
 
 
 def ping_test(ip):
     result = ping(ip, count=5)
     delay = result.rtt_avg_ms
-    msg = ip + '  平均延迟:   ' + str(delay) + ' ms'
+    msg = ip + '\t平均延迟: ' + str(delay) + ' ms'
     if delay<100:
         color_print(msg, status=2)
     else:
@@ -87,12 +87,12 @@ if len(good_ips) > 0:
     color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
     good_ips.sort(key=lambda x:x['delay'])
     for ip in good_ips:
-        color_print(ip['ip'] + '  平均延迟:   ' + str(ip['delay']) + ' ms', status=2)
+        color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
 else:
     ip_info.sort(key=lambda x:x['delay'])
     color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 3 个节点', status=1)
     for i in range(0,3):
-        color_print(ip_info[i]['ip'] + '  平均延迟:   ' + str(ip_info[i]['delay']) + ' ms')
+        color_print(ip_info[i]['ip'] + '\t平均延迟: ' + str(ip_info[i]['delay']) + ' ms')
 
 print()
 input('按回车退出')
