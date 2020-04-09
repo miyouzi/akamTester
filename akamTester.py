@@ -36,13 +36,15 @@ color_print(version_msg, 2)
 host = 'upos-hz-mirrorakam.akamaized.net'
 
 # 支持命令行, 允许用户通过参数指定测试域名
-if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--user_host', '-u', type=str,
-                        help='指定测试域名', default=host, required=True)
-    arg = parser.parse_args()
-    if arg.user_host:
-        host = arg.user_host
+parser = argparse.ArgumentParser()
+parser.add_argument('--user_host', '-u', type=str,
+                    help='指定测试域名', default=host, required=False)
+#增加通过命令行添加至hosts的选项
+parser.add_argument('--to_host', '-t',action="store_true",
+                    help='将最快的解析结果添加至hosts', required=False)                    
+arg = parser.parse_args()
+if arg.user_host:
+    host = arg.user_host
 
 try:
     akam = GlobalDNS(host)
@@ -99,12 +101,9 @@ else:
     for i in range(0, 3):
         color_print(ip_info[i]['ip'] + '\t平均延迟: ' +
                     str(ip_info[i]['delay']) + ' ms')
-
+                    
 # 新增加功能:是否写入hosts
-color_print("是否将延迟最短的 IP 写入 hosts？是请输入 \'y\'")
-con = input()
-
-if con == "y":
+if arg.to_host:
     #创建hosts备份文件，需要管理员权限
     print("即将创建hosts备份文件，请授予管理员权限",end='')
     os.system("sudo copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak")
