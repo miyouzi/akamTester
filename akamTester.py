@@ -8,7 +8,11 @@
 from pythonping import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
-import sys, os, argparse
+from python_hosts import Hosts, HostsEntry
+from filecmp import cmp
+import sys
+import os
+import argparse
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
@@ -20,7 +24,7 @@ def ping_test(ip):
     result = ping(ip, count=5)
     delay = result.rtt_avg_ms
     msg = ip + '\t平均延迟: ' + str(delay) + ' ms'
-    if delay<100:
+    if delay < 100:
         color_print(msg, status=2)
     else:
         color_print(msg)
@@ -34,7 +38,8 @@ host = 'upos-hz-mirrorakam.akamaized.net'
 # 支持命令行, 允许用户通过参数指定测试域名
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--user_host', '-u', type=str, help='指定测试域名', default=host, required=True)
+    parser.add_argument('--user_host', '-u', type=str,
+                        help='指定测试域名', default=host, required=True)
     arg = parser.parse_args()
     if arg.user_host:
         host = arg.user_host
@@ -85,15 +90,41 @@ print()
 
 if len(good_ips) > 0:
     color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
-    good_ips.sort(key=lambda x:x['delay'])
+    good_ips.sort(key=lambda x: x['delay'])
     for ip in good_ips:
         color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
 else:
-    ip_info.sort(key=lambda x:x['delay'])
+    ip_info.sort(key=lambda x: x['delay'])
     color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 3 个节点', status=1)
-    for i in range(0,3):
-        color_print(ip_info[i]['ip'] + '\t平均延迟: ' + str(ip_info[i]['delay']) + ' ms')
+    for i in range(0, 3):
+        color_print(ip_info[i]['ip'] + '\t平均延迟: ' +
+                    str(ip_info[i]['delay']) + ' ms')
 
+# 新增加功能:是否写入hosts
+color_print("是否将延迟最短的IP写入hosts？是请输入\'y\'")
+con = input()
+
+if con == "y":
+    #创建hosts备份文件，需要管理员权限
+    os.system("sudo copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak")
+    if len(good_ips) > 0:
+        fastHosts = Hosts()
+        new_entry = HostsEntry(entry_type='ipv4', address=good_ips[0]['ip'], names=[host])
+        fastHosts.add([new_entry])
+        fastHosts.write()
+    else:
+        fastHosts = Hosts(path='hosts_test')
+        new_entry = HostsEntry(
+            entry_type='ipv4', address=ip_info[0]['ip'], names=[host])
+        fastHosts.add([new_entry])
+        fastHosts.write()
+    """hostsFolder = os.environ['systemroot']+"\\drivers\\etc"
+    if cmp(hostsFolder+"\\hosts", hostsFolder+"\\hosts_bak"):
+        color_print("好像出现错误了，请尝试手动添加！", status=1)
+    else:
+        color_print("成功添加", status=2)
+        os.system('ipconfig /flushdns')
+        color_print("已尝试刷新DNS")"""
 print()
 input('按回车退出')
 sys.exit(0)
