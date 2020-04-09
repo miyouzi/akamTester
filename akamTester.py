@@ -101,12 +101,15 @@ else:
                     str(ip_info[i]['delay']) + ' ms')
 
 # 新增加功能:是否写入hosts
-color_print("是否将延迟最短的IP写入hosts？是请输入\'y\'")
+color_print("是否将延迟最短的 IP 写入 hosts？是请输入 \'y\'")
 con = input()
 
 if con == "y":
     #创建hosts备份文件，需要管理员权限
+    print("即将创建hosts备份文件，请授予管理员权限",end='')
     os.system("sudo copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak")
+    sys.stdout.flush()
+    print("已创建hosts备份文件！备份文件名为“hosts_bak")
     if len(good_ips) > 0:
         fastHosts = Hosts()
         new_entry = HostsEntry(entry_type='ipv4', address=good_ips[0]['ip'], names=[host])
@@ -118,13 +121,13 @@ if con == "y":
             entry_type='ipv4', address=ip_info[0]['ip'], names=[host])
         fastHosts.add([new_entry])
         fastHosts.write()
-    """hostsFolder = os.environ['systemroot']+"\\drivers\\etc"
+    hostsFolder = os.environ['systemroot']+"\\System32\\drivers\\etc"#从系统变量读取 防止出现用户的系统不在C盘的情况
     if cmp(hostsFolder+"\\hosts", hostsFolder+"\\hosts_bak"):
         color_print("好像出现错误了，请尝试手动添加！", status=1)
     else:
         color_print("成功添加", status=2)
         os.system('ipconfig /flushdns')
-        color_print("已尝试刷新DNS")"""
+        color_print("已尝试刷新DNS")
 print()
 input('按回车退出')
 sys.exit(0)
