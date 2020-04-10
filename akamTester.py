@@ -116,9 +116,9 @@ if arg.to_host:
     except ValueError:
         color_print('请尝试将您的Hosts文件保存为UTF-8 with BOM编码',status=1)
         if len(good_ips) > 0:
-            color_print('您可以尝试将 '+ good_ips[0]['ip']+' '+[host]+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
+            color_print('您可以尝试将 '+ good_ips[0]['ip']+' '+host+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
         else:
-            color_print('您可以尝试将 '+ ip_info[0]['ip']+' '+[host]+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
+            color_print('您可以尝试将 '+ ip_info[0]['ip']+' '+host+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
     else:
         pass
     #Hosts文件操作
