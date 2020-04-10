@@ -105,7 +105,7 @@ else:
 # 新增加功能:是否写入hosts
 if arg.to_host:
     #创建hosts备份文件，需要管理员权限
-    os.system('powershell -command {Start-Process -verb runas -filepath cmd.exe -argument "/C copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak"}')
+    os.system('powershell -command {Start-Process -verb runas -filepath cmd.exe -argument \"/C copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak \"}')
     print("已创建hosts备份文件！备份文件名为“hosts_bak")
     if len(good_ips) > 0:
         fastHosts = Hosts()
