@@ -1,5 +1,5 @@
 # akamTester
-批量测试B站海外CDN（upos-hz-mirrorakam.akamaized.net）节点延迟，找出最低延迟的节点，并将其添加至hosts*(可选)*。
+批量测试B站海外CDN（upos-hz-mirrorakam.akamaized.net）节点延迟，找出最低延迟的节点，并将其添加至hosts *(可选)* 。
 
 
 
