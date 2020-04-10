@@ -10,6 +10,7 @@ from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 from python_hosts import Hosts, HostsEntry
 from filecmp import cmp
+from time import sleep
 import sys
 import os
 import argparse
@@ -107,6 +108,7 @@ if arg.to_host:
     #创建hosts备份文件，需要管理员权限
     os.system(r'powershell -command {Start-Process -verb runas -filepath cmd.exe -argument "/C copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak"}')
     print("已创建hosts备份文件！备份文件名为“hosts_bak")
+    sleep(1)
     fastHosts = Hosts()
     fastHosts.remove_all_matching(name=[host])
     fastHosts.write()
