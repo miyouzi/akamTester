@@ -103,7 +103,7 @@ else:
     for i in range(0, 3):
         color_print(ip_info[i]['ip'] + '\t平均延迟: ' +
                     str(ip_info[i]['delay']) + ' ms')
-# 新增加功能:是否写入hosts
+# 新增加功能:写入hosts
 if arg.to_host:
     #创建hosts备份文件
     fol=os.getcwd()
@@ -123,8 +123,7 @@ if arg.to_host:
         pass
     #Hosts文件操作
     fastHosts = Hosts()
-    fastHosts.remove_all_matching(name=[host])
-    fastHosts.write()
+    fastHosts.remove_all_matching(name=host)
     if len(good_ips) > 0:
         new_entry = HostsEntry(entry_type='ipv4', address=good_ips[0]['ip'], names=[host])
     else:
