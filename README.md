@@ -34,7 +34,7 @@ python3 akamTester.py -u upos-sz-mirrorks3.bilivideo.com
 ```
 ### 写入至hosts
 
-从v5.0开始，用户可以通过```-t```或```--to_hosts```参数来决定是否将最快的解析结果写入到hosts里(需要管理员权限)
+从v5.0开始，用户可以通过```-t```或```--to_hosts```参数来决定是否将最快的解析结果写入到hosts里
 
 用例：
 
