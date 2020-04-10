@@ -109,29 +109,27 @@ if arg.to_host:
     fol=os.getcwd()
     hostsFolder = os.environ['systemroot']+"\\System32\\drivers\\etc"#从系统变量读取 防止出现用户的系统不在C盘的情况
     copyfile(hostsFolder+"\\hosts", fol+"\\hosts_bak")
+    if len(good_ips) > 0:
+        fastest_ip= good_ips[0]['ip']
+    else:
+        fastest_ip=  ip_info[0]['ip']
     #编码处理
     try:
         open(hostsFolder+"\\hosts", 'r')
         pass
     except ValueError:
         color_print('请尝试将您的Hosts文件保存为UTF-8 with BOM编码',status=1)
-        if len(good_ips) > 0:
-            color_print('您可以尝试将 '+ good_ips[0]['ip']+' '+host+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
-        else:
-            color_print('您可以尝试将 '+ ip_info[0]['ip']+' '+host+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
+        color_print('您可以尝试将 '+ fastest_ip +' '+host+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
     else:
         pass
     #Hosts文件操作
     fastHosts = Hosts()
     fastHosts.remove_all_matching(name=host)
-    if len(good_ips) > 0:
-        new_entry = HostsEntry(entry_type='ipv4', address=good_ips[0]['ip'], names=[host])
-    else:
-        new_entry = HostsEntry(entry_type='ipv4', address=ip_info[0]['ip'], names=[host])
-    fastHosts.add([new_entry])
+    new_entry = HostsEntry(entry_type='ipv4', address=fastest_ip, names=[host])
+    du=fastHosts.add([new_entry])
     fastHosts.write()    
     #判断是否修改成功
-    if cmp(hostsFolder+"\\hosts", fol+"\\hosts_bak"):
+    if cmp(hostsFolder+"\\hosts", fol+"\\hosts_bak") & du['duplicate_count']==0:
         color_print("好像出现错误了，请尝试手动添加！", status=1)
     else:
         color_print("成功添加", status=2)
