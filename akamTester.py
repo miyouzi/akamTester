@@ -10,7 +10,6 @@ from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 from shutil import copyfile
 from hosts import Hosts, HostsEntry
-from chardet import detect
 from filecmp import cmp
 from time import sleep
 import sys
@@ -104,7 +103,6 @@ else:
     for i in range(0, 3):
         color_print(ip_info[i]['ip'] + '\t平均延迟: ' +
                     str(ip_info[i]['delay']) + ' ms')
-
 # 新增加功能:是否写入hosts
 if arg.to_host:
     #创建hosts备份文件
@@ -112,22 +110,17 @@ if arg.to_host:
     hostsFolder = os.environ['systemroot']+"\\System32\\drivers\\etc"#从系统变量读取 防止出现用户的系统不在C盘的情况
     copyfile(hostsFolder+"\\hosts", fol+"\\hosts_bak")
     #编码处理
-    def check_encoding(file_path):
-        # 识别文件编码, 将非 UTF-8 编码转为 UTF-8
-        with open(file_path, 'rb') as f:
-            data = f.read()
-            file_encoding = detect(data)['encoding']  # 识别文件编码
-            if file_encoding == 'utf-8' or file_encoding == 'ascii':
-                # 如果为 UTF-8 编码, 无需操作
-                return
-            else:
-                # 如果为其他编码, 则转为 UTF-8 编码, 包含處理 BOM 頭
-                with open(file_path, 'wb') as f2:
-                    color_print(0, '檔案讀取', file_path+' 編碼為 '+file_encoding+' 將轉碼為 UTF-8', no_sn=True, status=1)
-                    data = data.decode(file_encoding)  # 解码
-                    data = data.encode('utf-8')  # 编码
-                    f2.write(data)  # 写入文件
-                    color_print(0, '檔案讀取', file_path + ' 轉碼成功', no_sn=True, status=2)
+    try:
+        open(hostsFolder+"\\hosts", 'r')
+        pass
+    except ValueError:
+        color_print('请尝试将您的Hosts文件保存为UTF-8 with BOM编码',status=1)
+        if len(good_ips) > 0:
+            color_print('您可以尝试将 '+ good_ips[0]['ip']+' '+[host]+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
+        else:
+            color_print('您可以尝试将 '+ ip_info[0]['ip']+' '+[host]+' 拷贝到hosts文件最后一行，您的Hosts文件路径为 '+hostsFolder+"\\hosts")
+    else:
+        pass
     #Hosts文件操作
     fastHosts = Hosts()
     fastHosts.remove_all_matching(name=[host])
