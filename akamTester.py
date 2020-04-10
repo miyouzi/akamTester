@@ -101,12 +101,12 @@ else:
     for i in range(0, 3):
         color_print(ip_info[i]['ip'] + '\t平均延迟: ' +
                     str(ip_info[i]['delay']) + ' ms')
-                    
+
 # 新增加功能:是否写入hosts
 if arg.to_host:
     #创建hosts备份文件，需要管理员权限
     print("即将创建hosts备份文件，请授予管理员权限",end='')
-    os.system("sudo copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak")
+    os.system(" copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak")
     sys.stdout.flush()
     print("已创建hosts备份文件！备份文件名为“hosts_bak")
     if len(good_ips) > 0:
