@@ -7,7 +7,7 @@ P.S.  ```ip_list.txt``` 文件用于保存解析出来的ip列表, 当正常解�
 
 :warning: 在Win7上需要使用管理员权限运行! :warning:
 
-##运行
+## 运行
 
 ### EXE文件运行
 不熟悉Python的用户直接从 [releases](https://github.com/miyouzi/akamTester/releases/latest) 下载exe文件使用。
