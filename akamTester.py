@@ -107,17 +107,15 @@ if arg.to_host:
     #创建hosts备份文件，需要管理员权限
     os.system(r'powershell -command {Start-Process -verb runas -filepath cmd.exe -argument "/C copy %SystemRoot%\System32\drivers\etc\hosts %SystemRoot%\System32\drivers\etc\hosts_bak"}')
     print("已创建hosts备份文件！备份文件名为“hosts_bak")
+    fastHosts = Hosts()
+    fastHosts.remove_all_matching(name=[host])
+    fastHosts.write()
     if len(good_ips) > 0:
-        fastHosts = Hosts()
         new_entry = HostsEntry(entry_type='ipv4', address=good_ips[0]['ip'], names=[host])
-        fastHosts.add([new_entry])
-        fastHosts.write()
     else:
-        fastHosts = Hosts(path='hosts_test')
-        new_entry = HostsEntry(
-            entry_type='ipv4', address=ip_info[0]['ip'], names=[host])
-        fastHosts.add([new_entry])
-        fastHosts.write()
+        new_entry = HostsEntry(entry_type='ipv4', address=ip_info[0]['ip'], names=[host])
+    fastHosts.add([new_entry])
+    fastHosts.write()    
     hostsFolder = os.environ['systemroot']+"\\System32\\drivers\\etc"#从系统变量读取 防止出现用户的系统不在C盘的情况
     if cmp(hostsFolder+"\\hosts", hostsFolder+"\\hosts_bak"):
         color_print("好像出现错误了，请尝试手动添加！", status=1)
