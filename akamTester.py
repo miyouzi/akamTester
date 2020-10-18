@@ -13,7 +13,7 @@ import sys, os, argparse
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
-version = 4.0
+version = 4.1
 
 
 def ping_test(ip):
@@ -90,8 +90,11 @@ if len(good_ips) > 0:
         color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
 else:
     ip_info.sort(key=lambda x:x['delay'])
-    color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 3 个节点', status=1)
-    for i in range(0,3):
+    num = len(ip_info)  # 要显示的节点数
+    if num > 3:  # 如果解析的节点数超过 3 个, 那么显示 3 个就行
+        num = 3
+    color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 ' + str(num) + ' 个节点', status=1)
+    for i in range(0,num):
         color_print(ip_info[i]['ip'] + '\t平均延迟: ' + str(ip_info[i]['delay']) + ' ms')
 
 print()

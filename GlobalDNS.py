@@ -5,7 +5,7 @@
 # @File    : GlobalDNS.py
 # @Software: PyCharm
 
-import requests, dns.resolver
+import requests, dns.resolver, json
 from bs4 import BeautifulSoup
 import re, time, socket
 
@@ -34,10 +34,10 @@ class GlobalDNS():
         header = {
             "Host": host,
             "User-Agent": ua,
-            # "referer": ref,
+            "referer": ref,
             "Accept": accept,
             "Accept-Language": lang,
-            # "Accept-Encoding": accept_encoding,
+            "Accept-Encoding": accept_encoding,
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
             "Pragma": cache_control,
@@ -62,18 +62,12 @@ class GlobalDNS():
 
     def __get_src(self):
         bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
-        # bf4 = self.__request('https://www.whatsmydns.net/')
         self.__src = bf4
-
-    def __get_token(self):
-        token = self.__src.find('input', id='_token')
-        self.__token = token.get('value')
 
     def __get_dns_id(self):
         a = self.__src.find_all('tr')
         for id in a:
             self.__dns_id.add(id.get('data-id'))
-        # print(self.__dns_id)
 
     def __extend_query(self):
         # 本地解析
@@ -102,20 +96,15 @@ class GlobalDNS():
 
     def __global_query(self):
         for dns_id in self.__dns_id:
-            url = 'https://www.whatsmydns.net/api/check?server='+dns_id\
-                  +'&type=A&query='+self.__domain\
-                  +'&_token='+self.__token
-            # print(url)
+            url = 'https://www.whatsmydns.net/api/details?server='+dns_id\
+                  +'&type=A&query='+self.__domain
             try:
-                src = self.__request(url)
-                # print('src= ',src)
-                ips = str(src.contents[0])
-                ip = re.findall(r'\d+\.\d+\.\d+\.\d+', ips)
-                self.__ip_list = self.__ip_list | set(ip)
+                details = self.__request(url).json()
+                ip = details["data"][0]["response"]
+                self.__ip_list = self.__ip_list | set(ip)  # set 并集
             except IndexError:
                 pass
                 # 该 DNS 失效
-        # print(self.__ip_list)
 
     def get_ip_list(self):
 
@@ -128,9 +117,7 @@ class GlobalDNS():
         print('正在对 ' + self.__domain + ' 进行全球解析……')
         self.__session.cookies.clear()
         self.__get_src()
-        self.__get_token()
         self.__get_dns_id()
         self.__global_query()
         self.__extend_query()
         print(self.__domain + ' 的全球解析已完成')
-
