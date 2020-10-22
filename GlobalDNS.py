@@ -13,8 +13,8 @@ import re, time, socket
 class GlobalDNS():
     def __init__(self, domain, max_retry=3):
         self.__domain = domain
-        self.__ip_list = set([])
-        self.__dns_id = set([])
+        self.__ip_list = set()
+        self.__dns_id = set()
         self.__session = requests.session()
         self.__max_retry = max_retry
         self.__token = ''
@@ -65,9 +65,12 @@ class GlobalDNS():
         self.__src = bf4
 
     def __get_dns_id(self):
-        a = self.__src.find_all('tr')
+        a = self.__src.find('div', id='home-page').find(id='r')
+        a = a.find_all(attrs={"data-id": True})
         for id in a:
-            self.__dns_id.add(id.get('data-id'))
+            id_num = id.get('data-id')
+            if re.match(r'\d+', id_num):
+                self.__dns_id.add(id_num)
 
     def __extend_query(self):
         # 本地解析
@@ -99,9 +102,11 @@ class GlobalDNS():
             url = 'https://www.whatsmydns.net/api/details?server='+dns_id\
                   +'&type=A&query='+self.__domain
             try:
-                details = self.__request(url).json()
+                text = self.__request(url).text
+                details = json.loads(text)
                 ip = details["data"][0]["response"]
-                self.__ip_list = self.__ip_list | set(ip)  # set 并集
+                if isinstance(ip, list):
+                    self.__ip_list = self.__ip_list | set(ip)  # set 并集
             except IndexError:
                 pass
                 # 该 DNS 失效
@@ -121,3 +126,10 @@ class GlobalDNS():
         self.__global_query()
         self.__extend_query()
         print(self.__domain + ' 的全球解析已完成')
+
+
+if __name__ == '__main__':
+    import pprint
+    a = GlobalDNS('upos-hz-mirrorakam.akamaized.net')
+    b = a.get_ip_list()
+    pprint.pprint(b)
