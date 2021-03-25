@@ -19,6 +19,7 @@ import argparse
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
+version = 4.1
 version = 5.0
 
 
