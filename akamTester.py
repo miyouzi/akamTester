@@ -81,7 +81,7 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
     futures = [executor.submit(ping_test, ip) for ip in ip_list]
     delays = [f.result() for f in futures]
 
-for delay in delays:
+for delay, ip in zip(delays, ip_list):
     ip_info.append({'ip': ip, 'delay': delay})
     if delay < 100:
         good_ips.append({'ip': ip, 'delay': delay})
