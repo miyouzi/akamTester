@@ -9,6 +9,7 @@ from pythonping import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 import sys, os, argparse
+import concurrent.futures
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
@@ -76,11 +77,15 @@ print()
 ip_info = []
 good_ips = []
 
-for ip in ip_list:
-    delay = ping_test(ip)
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    futures = [executor.submit(ping_test, ip) for ip in ip_list]
+    delays = [f.result() for f in futures]
+
+for delay in delays:
     ip_info.append({'ip': ip, 'delay': delay})
     if delay < 100:
         good_ips.append({'ip': ip, 'delay': delay})
+
 print()
 
 if len(good_ips) > 0:
