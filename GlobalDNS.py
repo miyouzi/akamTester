@@ -8,6 +8,7 @@
 import requests, dns.resolver, json
 from bs4 import BeautifulSoup
 import re, time, socket
+import concurrent.futures
 
 
 class GlobalDNS():
@@ -97,7 +98,28 @@ class GlobalDNS():
         for i in A:
             self.__ip_list.add(i.address)
 
+
     def __global_query(self):
+        urls = []
+        for dns_id in self.__dns_id:
+            url = 'https://www.whatsmydns.net/api/details?server='+dns_id\
+                  +'&type=A&query='+self.__domain
+            urls.append(url)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.__request, url) for url in urls]
+            results = [f.result() for f in futures]
+
+        for res in results:
+            try:
+                details = json.loads(res.text)
+                ip = details["data"][0]["response"]
+                if isinstance(ip, list):
+                    self.__ip_list = self.__ip_list | set(ip)  # set 并集
+            except IndexError:
+                pass
+                # 该 DNS 失效
+
+    def __global_query2(self):
         for dns_id in self.__dns_id:
             url = 'https://www.whatsmydns.net/api/details?server='+dns_id\
                   +'&type=A&query='+self.__domain
