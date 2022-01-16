@@ -16,8 +16,14 @@
 ## 源码运行
 
 安装依赖:
+
+For Windows cmd:
 ```
 pip3 install requests beautifulsoup4 lxml termcolor pythonping dnspython
+```
+For Linux (tested on Arch Linux):
+```
+sudo pip install -r requirements.txt
 ```
 
 执行 ```akamTester.py```
