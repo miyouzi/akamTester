@@ -3,4 +3,4 @@ pythonping==1.0.8
 requests==2.23.0
 beautifulsoup4==4.8.2
 dnspython==1.16.0
-lxml==4.6.1
+lxml==4.6.5
