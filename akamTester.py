@@ -5,7 +5,8 @@
 # @File    : akamTester.py
 # @Software: PyCharm
 
-from pythonping import ping
+#from pythonping import ping
+from icmplib import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 import sys, os, argparse
@@ -18,8 +19,8 @@ version = 4.1
 
 
 def ping_test(ip):
-    result = ping(ip, count=5)
-    delay = result.rtt_avg_ms
+    result = ping(ip, count=5, privileged=False)
+    delay = result.avg_rtt
     msg = ip + '\t平均延迟: ' + str(delay) + ' ms'
     if delay<100:
         color_print(msg, status=2)
