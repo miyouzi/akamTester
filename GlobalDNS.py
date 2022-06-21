@@ -9,6 +9,8 @@ import requests, dns.resolver, json
 from bs4 import BeautifulSoup
 import re, time, socket
 import concurrent.futures
+import cfscrape
+import json
 
 
 class GlobalDNS():
@@ -19,9 +21,9 @@ class GlobalDNS():
         self.__session = requests.session()
         self.__max_retry = max_retry
         self.__token = ''
-        self.__src = None
         self.__init_header()
         self.__session.headers.update(self.__req_header)
+        self.scraper = cfscrape.create_scraper()
 
     def __init_header(self):
         # 伪装为Chrome
@@ -61,17 +63,10 @@ class GlobalDNS():
                 error_cnt += 1
         return BeautifulSoup(f.content, "lxml")
 
-    def __get_src(self):
-        bf4 = self.__request('https://www.whatsmydns.net/#A/' + self.__domain)
-        self.__src = bf4
-
     def __get_dns_id(self):
-        a = self.__src.find('div', id='home-page').find(id='r')
-        a = a.find_all(attrs={"data-id": True})
-        for id in a:
-            id_num = id.get('data-id')
-            if re.match(r'\d+', id_num):
-                self.__dns_id.add(id_num)
+        response = self.scraper.get('https://www.whatsmydns.net/api/servers')
+        json_object= json.loads(response.content)
+        self.__dns_id = set(map(lambda s: s['id'], json_object))
 
     def __extend_query(self):
         # 本地解析
@@ -106,7 +101,7 @@ class GlobalDNS():
                   +'&type=A&query='+self.__domain
             urls.append(url)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self.__request, url) for url in urls]
+            futures = [executor.submit(self.scraper.get, url) for url in urls]
             results = [f.result() for f in futures]
 
         for res in results:
@@ -143,7 +138,6 @@ class GlobalDNS():
     def renew(self):
         print('正在对 ' + self.__domain + ' 进行全球解析……')
         self.__session.cookies.clear()
-        self.__get_src()
         self.__get_dns_id()
         self.__global_query()
         self.__extend_query()
