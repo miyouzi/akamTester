@@ -5,7 +5,8 @@
 # @File    : akamTester.py
 # @Software: PyCharm
 
-from pythonping import ping
+#from pythonping import ping
+from icmplib import ping
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
 import sys, os, argparse
@@ -14,12 +15,12 @@ import concurrent.futures
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
-version = 4.1
+version = 5.0
 
 
 def ping_test(ip):
-    result = ping(ip, count=5)
-    delay = result.rtt_avg_ms
+    result = ping(ip, count=5, privileged=False)
+    delay = result.avg_rtt
     msg = ip + '\t平均延迟: ' + str(delay) + ' ms'
     if delay<100:
         color_print(msg, status=2)
