@@ -40,6 +40,8 @@ if len(sys.argv) > 1:
     arg = parser.parse_args()
     if arg.user_host:
         host = arg.user_host
+    #添加一个以host为名称的低延迟ip列表地址，以供后续保存
+    low_delay_ip_list_path = os.path.join(working_dir, host+'.txt')
 
 try:
     akam = GlobalDNS(host)
@@ -92,8 +94,12 @@ print()
 if len(good_ips) > 0:
     color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
     good_ips.sort(key=lambda x:x['delay'])
-    for ip in good_ips:
-        color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
+    #保存所有低延迟ip到txt，并在后面添加上该host，以供快速复制到hosts修改
+    with open(low_delay_ip_list_path, 'w', encoding='utf-8') as f:
+        for ip in good_ips:
+            color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
+            f.write(ip['ip']+' '+host)
+            f.write('\n')
 else:
     ip_info.sort(key=lambda x:x['delay'])
     num = len(ip_info)  # 要显示的节点数
