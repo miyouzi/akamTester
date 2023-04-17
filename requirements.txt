@@ -3,6 +3,6 @@ pythonping==1.0.8
 requests==2.23.0
 beautifulsoup4==4.8.2
 dnspython==1.16.0
-lxml==4.6.5
+lxml==4.9.1
 icmplib==3.0.3
 cfscrape==2.1.1
