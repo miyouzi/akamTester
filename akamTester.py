@@ -22,7 +22,7 @@ ip_list_path = os.path.join(working_dir, 'ip_list.txt')
 version = 6.0
 
 def normalize_host(host):
-    """去除 URL 協議與尾部斜線"""
+    """去除 URL 协议与尾部斜线"""
     if host.startswith("http://"):
         host = host[len("http://"):]
     elif host.startswith("https://"):
@@ -32,24 +32,24 @@ def normalize_host(host):
 
 def https_test(ip, host, port=443, max_retries=5):
     """
-    使用 TLS 握手模擬 HTTPS 體驗：針對指定 IP 建立一個帶有 SNI（host）的 SSL/TLS 連線，
-    測量從建立 TCP 連線到握手完成的總延遲（毫秒）。
-    若失敗則重試 max_retries 次。
+    使用 TLS 握手模拟 HTTPS 体验：针对指定 IP 建立一个带有 SNI（host）的 SSL/TLS 连线，
+    测量从建立 TCP 连线到握手完成的总延迟（毫秒）。
+    若失败则重试 max_retries 次。
     """
     attempts = 0
     delay = float('inf')
     while attempts < max_retries:
         try:
             raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            raw_sock.settimeout(5)  # 超時設定為 5 秒
+            raw_sock.settimeout(5)  # 超时设定为 5 秒
             start = time.time()
             raw_sock.connect((ip, port))
             context = ssl.create_default_context()
             ssl_sock = context.wrap_socket(raw_sock, server_hostname=host)
             end = time.time()
-            delay = (end - start) * 1000  # 轉換為毫秒
+            delay = (end - start) * 1000  # 转换为毫秒
             ssl_sock.close()
-            break  # 成功連線則退出
+            break  # 成功连线则退出
         except Exception as e:
             attempts += 1
     msg = f"{ip}\tHTTPS连接延迟: {delay:.1f} ms"
@@ -61,7 +61,7 @@ def https_test(ip, host, port=443, max_retries=5):
 
 
 def process_host(host):
-    """針對單一域名進行解析與 HTTPS 連接測試"""
+    """针对单一域名进行解析与 HTTPS 连接测试"""
     normalized_host = normalize_host(host)
     low_delay_ip_list_path = os.path.join(working_dir, normalized_host + '.txt')
 
@@ -95,7 +95,7 @@ def process_host(host):
 
     ip_info = []
     good_ips = []
-    # 使用 ThreadPoolExecutor 來併發測試每個 IP 的 HTTPS 連線延遲
+    # 使用 ThreadPoolExecutor 来并发测试每个 IP 的 HTTPS 连线延迟
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_map = {executor.submit(https_test, ip, normalized_host): ip for ip in ip_set}
         for future in concurrent.futures.as_completed(future_map):
