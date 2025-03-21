@@ -121,7 +121,7 @@ def process_host(host):
             color_print(f"{ip_info[i]['ip']}\tHTTPS连接延迟: {ip_info[i]['delay']:.1f} ms", status=1)
 
     color_print("------------------------------------------------------------", status=2)
-    
+
 
 def main():
     parser = argparse.ArgumentParser()
