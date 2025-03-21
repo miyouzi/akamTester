@@ -100,8 +100,8 @@ color_print('成功输出', status=2)    # 绿色
 
 ## 项目维护说明
 
-本项目原由 @Miyouzi 创建。  
-本版本由 @oldip 改进，加入以下核心功能：
+本项目原由 [@Miyouzi](https://github.com/miyouzi) 创建。  
+本版本由 [@oldip](https://github.com/oldip) 改进，加入以下核心功能：
 
 - 多 DNS 平台整合
 - 模拟 HTTPS 握手测速
