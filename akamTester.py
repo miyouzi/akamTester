@@ -1,114 +1,145 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# @Time    : 2019/7/19 16:52
-# @Author  : Miyouzi
+# @Time    : 2025/03/22
+# @Author  : Miyouzi & oldip
 # @File    : akamTester.py
 # @Software: PyCharm
 
-#from pythonping import ping
-from icmplib import ping
+import os
+import sys
+import argparse
+import socket
+import time
+import concurrent.futures
+import ssl
+
 from ColorPrinter import color_print
 from GlobalDNS import GlobalDNS
-import sys, os, argparse
-import concurrent.futures
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
 ip_list_path = os.path.join(working_dir, 'ip_list.txt')
-version = 5.0
+version = 6.0
+
+def normalize_host(host):
+    """去除 URL 協議與尾部斜線"""
+    if host.startswith("http://"):
+        host = host[len("http://"):]
+    elif host.startswith("https://"):
+        host = host[len("https://"):]
+    return host.rstrip("/")
 
 
-def ping_test(ip):
-    result = ping(ip, count=5, privileged=False)
-    delay = result.avg_rtt
-    msg = ip + '\t平均延迟: ' + str(delay) + ' ms'
-    if delay<100:
+def https_test(ip, host, port=443, max_retries=5):
+    """
+    使用 TLS 握手模擬 HTTPS 體驗：針對指定 IP 建立一個帶有 SNI（host）的 SSL/TLS 連線，
+    測量從建立 TCP 連線到握手完成的總延遲（毫秒）。
+    若失敗則重試 max_retries 次。
+    """
+    attempts = 0
+    delay = float('inf')
+    while attempts < max_retries:
+        try:
+            raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            raw_sock.settimeout(5)  # 超時設定為 5 秒
+            start = time.time()
+            raw_sock.connect((ip, port))
+            context = ssl.create_default_context()
+            ssl_sock = context.wrap_socket(raw_sock, server_hostname=host)
+            end = time.time()
+            delay = (end - start) * 1000  # 轉換為毫秒
+            ssl_sock.close()
+            break  # 成功連線則退出
+        except Exception as e:
+            attempts += 1
+    msg = f"{ip}\tHTTPS连接延迟: {delay:.1f} ms"
+    if delay < 200:
         color_print(msg, status=2)
     else:
         color_print(msg)
     return delay
 
 
-version_msg = '当前akamTester版本: ' + str(version)
-color_print(version_msg, 2)
-host = 'upos-hz-mirrorakam.akamaized.net'
+def process_host(host):
+    """針對單一域名進行解析與 HTTPS 連接測試"""
+    normalized_host = normalize_host(host)
+    low_delay_ip_list_path = os.path.join(working_dir, normalized_host + '.txt')
 
-# 支持命令行, 允许用户通过参数指定测试域名
-if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--user_host', '-u', type=str, help='指定测试域名', default=host, required=True)
-    arg = parser.parse_args()
-    if arg.user_host:
-        host = arg.user_host
-    #添加一个以host为名称的低延迟ip列表地址，以供后续保存
-    low_delay_ip_list_path = os.path.join(working_dir, host+'.txt')
+    color_print(f"\n当前测试域名：{normalized_host}", status=2)
+    try:
+        gd = GlobalDNS(normalized_host)
+        color_print('第一次解析:')
+        ip_set = gd.get_ip_list()
 
-try:
-    akam = GlobalDNS(host)
-    color_print('第一次解析:')
-    ip_list = akam.get_ip_list()
-    print()
-    color_print('第二次解析:')
-    akam.renew()
-    ip_list = ip_list | akam.get_ip_list()
-    print()
-    color_print('第三次解析:')
-    akam.renew()
-    ip_list = ip_list | akam.get_ip_list()
-except BaseException as e:
-    color_print('进行全球解析时遇到未知错误: '+str(e), status=1)
-    if os.path.exists(ip_list_path):
-        color_print('将读取本地保存的ip列表', status=1)
-        with open(ip_list_path, 'r', encoding='utf-8') as f:
-            ip_list = f.read().splitlines()
+        # 額外多次解析以收集更多 IP（可根據需要調整次數）
+        extra_renew_times = 3
+        for i in range(extra_renew_times):
+            color_print(f'第 {i+2} 次解析:')
+            gd.renew()
+            ip_set.update(gd.get_ip_list())
+    except Exception as e:
+        color_print(f'进行全球解析时遇到未知错误: {e}', status=1)
+        if os.path.exists(ip_list_path):
+            color_print('将读取本地保存的 IP 列表', status=1)
+            with open(ip_list_path, 'r', encoding='utf-8') as f:
+                ip_set = set(line.strip() for line in f if line.strip())
+        else:
+            color_print('没有本地保存的 IP 列表！程序终止！', status=1)
+            sys.exit(0)
     else:
-        color_print('没有本地保存的ip列表！程序终止！', status=1)
-        print()
-        input('按回车退出')
-        sys.exit(0)
-else:
-    # 保存解析结果
-    with open(ip_list_path, 'w', encoding='utf-8') as f:
-        for ip in ip_list:
-            f.write(str(ip))
-            f.write('\n')
+        with open(ip_list_path, 'w', encoding='utf-8') as f:
+            for ip in ip_set:
+                f.write(ip + '\n')
 
-print()
-color_print('共取得 '+str(len(ip_list))+' 个 IP, 开始测试延迟')
-print()
+    color_print(f'\n共取得 {len(ip_set)} 个 IP, 开始测试 HTTPS 连接延迟', status=2)
 
-ip_info = []
-good_ips = []
+    ip_info = []
+    good_ips = []
+    # 使用 ThreadPoolExecutor 來併發測試每個 IP 的 HTTPS 連線延遲
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_map = {executor.submit(https_test, ip, normalized_host): ip for ip in ip_set}
+        for future in concurrent.futures.as_completed(future_map):
+            ip = future_map[future]
+            delay = future.result()
+            ip_info.append({'ip': ip, 'delay': delay})
+            if delay < 200:
+                good_ips.append({'ip': ip, 'delay': delay})
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    futures = [executor.submit(ping_test, ip) for ip in ip_list]
-    delays = [f.result() for f in futures]
+    print()
+    if good_ips:
+        color_print('基于当前网络环境, 以下为 HTTPS 连接延迟低于200ms的IP', status=2)
+        good_ips.sort(key=lambda x: x['delay'])
+        with open(low_delay_ip_list_path, 'w', encoding='utf-8') as f:
+            for item in good_ips:
+                color_print(f"{item['ip']}\tHTTPS连接延迟: {item['delay']:.1f} ms", status=2)
+                f.write(item['ip'] + ' ' + normalized_host + '\n')
+    else:
+        ip_info.sort(key=lambda x: x['delay'])
+        num = min(3, len(ip_info))
+        color_print(f'本次测试未能找到 HTTPS 连接延迟低于200ms的IP! 以下为延迟最低的 {num} 个节点', status=1)
+        for i in range(num):
+            color_print(f"{ip_info[i]['ip']}\tHTTPS连接延迟: {ip_info[i]['delay']:.1f} ms", status=1)
 
-for delay, ip in zip(delays, ip_list):
-    ip_info.append({'ip': ip, 'delay': delay})
-    if delay < 100:
-        good_ips.append({'ip': ip, 'delay': delay})
+    color_print("------------------------------------------------------------", status=2)
+    
 
-print()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--user_hosts', '-u', nargs='+', 
+                        help='指定测试域名列表（空格分隔）',
+                        default=['upos-sz-mirroraliov.bilivideo.com', 'upos-hz-mirrorakam.akamaized.net'],
+                        required=False)
+    args = parser.parse_args()
+    hosts = args.user_hosts
 
-if len(good_ips) > 0:
-    color_print('基于当前网络环境, 以下为延迟低于100ms的IP', status=2)
-    good_ips.sort(key=lambda x:x['delay'])
-    #保存所有低延迟ip到txt，并在后面添加上该host，以供快速复制到hosts修改
-    with open(low_delay_ip_list_path, 'w', encoding='utf-8') as f:
-        for ip in good_ips:
-            color_print(ip['ip'] + '\t平均延迟: ' + str(ip['delay']) + ' ms', status=2)
-            f.write(ip['ip']+' '+host)
-            f.write('\n')
-else:
-    ip_info.sort(key=lambda x:x['delay'])
-    num = len(ip_info)  # 要显示的节点数
-    if num > 3:  # 如果解析的节点数超过 3 个, 那么显示 3 个就行
-        num = 3
-    color_print('本次测试未能找到延迟低于100ms的IP! 以下为延迟最低的 ' + str(num) + ' 个节点', status=1)
-    for i in range(0,num):
-        color_print(ip_info[i]['ip'] + '\t平均延迟: ' + str(ip_info[i]['delay']) + ' ms')
+    version_msg = f'当前 akamTester 版本: {version}'
+    color_print(version_msg, status=2)
 
-print()
-input('按回车退出')
-sys.exit(0)
+    for host in hosts:
+        process_host(host)
+
+    input('按回车退出')
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()
