@@ -9,7 +9,7 @@ import dns.resolver
 import socket
 import re
 import concurrent.futures
-import cfscrape
+import cloudscraper 
 import json
 
 class GlobalDNS():
@@ -25,7 +25,7 @@ class GlobalDNS():
     def __init__(self, domain):
         self.__domain = domain
         self.__ip_list = set()
-        self.scraper = cfscrape.create_scraper()
+        self.scraper = cloudscraper.create_scraper()
         
         # 额外的公共 DNS 伺服器 (这些将用来查询，但最终不纳入结果)
         self.__extra_dns_servers = [
