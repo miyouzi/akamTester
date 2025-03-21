@@ -164,8 +164,8 @@ class GlobalDNS():
         if not self.__ip_list:
             # 如果尚未解析
             self.renew()
-            # 过滤掉已知的 DNS 伺服器 IP
-            filtered_ips = self.__ip_list - self.__dns_filter_set
+        # 过滤掉已知的 DNS 伺服器 IP
+        filtered_ips = self.__ip_list - self.__dns_filter_set
         return filtered_ips
 
     def renew(self):
