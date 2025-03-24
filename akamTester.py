@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# @Time    : 2025/03/22
+# @Time    : 2025/03/25
 # @Author  : Miyouzi & oldip
 # @File    : akamTester.py
 # @Software: PyCharm
@@ -18,7 +18,7 @@ from GlobalDNS import GlobalDNS
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # working_dir = os.path.dirname(sys.executable)  # 使用 pyinstaller 编译时，打开此项
-ip_list_path = os.path.join(working_dir, 'ip_list.txt')
+# ip_list_path = os.path.join(working_dir, 'ip_list.txt')
 version = 6.0
 
 def normalize_host(host):
@@ -63,6 +63,8 @@ def https_test(ip, host, port=443, max_retries=5):
 def process_host(host):
     """针对单一域名进行解析与 HTTPS 连接测试"""
     normalized_host = normalize_host(host)
+    # 使用独立的缓存文件保存解析到的 IP
+    host_cache_file = os.path.join(working_dir, normalized_host + "_iplist.txt")
     low_delay_ip_list_path = os.path.join(working_dir, normalized_host + '.txt')
 
     color_print(f"\n当前测试域名：{normalized_host}", status=2)
@@ -72,22 +74,22 @@ def process_host(host):
         ip_set = gd.get_ip_list()
 
         # 額外多次解析以收集更多 IP（可根據需要調整次數）
-        extra_renew_times = 3
+        extra_renew_times = 2
         for i in range(extra_renew_times):
             color_print(f'第 {i+2} 次解析:')
             gd.renew()
             ip_set.update(gd.get_ip_list())
     except Exception as e:
         color_print(f'进行全球解析时遇到未知错误: {e}', status=1)
-        if os.path.exists(ip_list_path):
+        if os.path.exists(host_cache_file):
             color_print('将读取本地保存的 IP 列表', status=1)
-            with open(ip_list_path, 'r', encoding='utf-8') as f:
+            with open(host_cache_file, 'r', encoding='utf-8') as f:
                 ip_set = set(line.strip() for line in f if line.strip())
         else:
             color_print('没有本地保存的 IP 列表！程序终止！', status=1)
             sys.exit(0)
     else:
-        with open(ip_list_path, 'w', encoding='utf-8') as f:
+        with open(host_cache_file, 'w', encoding='utf-8') as f:
             for ip in ip_set:
                 f.write(ip + '\n')
 
