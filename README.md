@@ -1,5 +1,5 @@
 # akamTester v6.0
-批量测试 B 站海外 CDN（如 Akamai）节点延迟，找出最低延迟节点，并生成可用于 hosts 加速的记录。
+批量测试 B 站海外 CDN（如 upos-hz-mirrorakam.akamaized.net）节点延迟，找出最低延迟节点，并生成可用于 hosts 加速的记录。
 
 ---
 
@@ -15,7 +15,7 @@
 155.102.4.143 upos-sz-mirroraliov.bilivideo.com
 ```
 
-```ip_list.txt``` 文件用于缓存解析得到的 IP，当网络异常或解析失败时，会从中读取作为备用。
+`*_iplist.txt` 文件用于缓存每个域名解析得到的 IP，当网络异常或解析失败时，会从对应的缓存文件中读取作为备用，确保各个域名数据互不干扰。
 
 ---
 
@@ -78,6 +78,7 @@ ip_list = akam.get_ip_list()  # 获取全球解析结果
 akam.renew()  # 重新解析
 ip_list = akam.get_ip_list()  # 获取更新后的结果
 ```
+独立缓存文件（如 `upos-hz-mirrorakam.akamaized.net_iplist.txt`）用于存储每个域名的解析结果，确保多域名测试时数据独立。
 
 ---
 
@@ -105,7 +106,7 @@ color_print('成功输出', status=2)    # 绿色
 
 - 多 DNS 平台整合
 - 模拟 HTTPS 握手测速
-- 支持多域名批量测试
+- 支持多域名批量测试，每个域名独立缓存解析结果
 - 自动筛选延迟 <200ms 节点并输出
 - 使用 cloudscraper 替代 cfscrape，增强稳定性
 
